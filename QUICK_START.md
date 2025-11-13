@@ -7,7 +7,8 @@ Get up and running with Clipboard Manager in 5 minutes!
 ```bash
 cd /tmp/clipboard-manager
 open ClipboardManager.xcodeproj
-```
+
+
 
 Xcode will open and automatically download dependencies (SQLite.swift).
 
@@ -15,7 +16,7 @@ Xcode will open and automatically download dependencies (SQLite.swift).
 
 In Xcode:
 1. Wait for "Indexing..." to complete
-2. Press `Cmd + R` (or click the ▶️ Play button)
+2. Press `Cmd + R` (or  click the ▶️ Play button)
 3. The app will build and launch
 
 **Look for**: A clipboard icon in your menu bar (top-right of screen)
@@ -27,7 +28,7 @@ A dialog will appear asking for Accessibility permissions:
 1. Click **"Open System Preferences"**
 2. Click the 🔒 lock icon and enter your password
 3. Check the box next to **"ClipboardManager"**
-4. Close System Preferences
+4. Close System Preferences  
 
 **Note**: If the app doesn't appear in the list, restart it and try again.
 
