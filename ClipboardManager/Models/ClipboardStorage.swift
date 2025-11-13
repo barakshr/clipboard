@@ -106,6 +106,27 @@ class ClipboardStorage {
         }
     }
     
+    func getFavorites() -> [ClipboardItem] {
+        guard let db = db else { return [] }
+        
+        do {
+            let query = items.filter(isFavorite == true).order(timestamp.desc)
+            return try db.prepare(query).map { row in
+                ClipboardItem(
+                    id: row[id],
+                    timestamp: row[timestamp],
+                    isFavorite: row[isFavorite],
+                    contentType: ClipboardContentType(rawValue: row[contentType]) ?? .text,
+                    textContent: row[textContent],
+                    imageData: row[imageData]
+                )
+            }
+        } catch {
+            print("Error fetching favorites: \(error)")
+            return []
+        }
+    }
+    
     func searchItems(query: String, limit: Int = 10) -> [ClipboardItem] {
         guard let db = db, !query.isEmpty else { return getRecentItems(limit: limit) }
         

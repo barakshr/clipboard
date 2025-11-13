@@ -62,9 +62,11 @@ class PopupViewController: NSViewController {
     private var searchField: NSSearchField!
     private var tableView: NSTableView!
     private var scrollView: NSScrollView!
+    private var favoritesButton: NSButton!
     
     private var items: [ClipboardItem] = []
     private var isSearching = false
+    private var showingFavoritesOnly = false
     
     override func loadView() {
         view = NSView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
@@ -73,7 +75,7 @@ class PopupViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        loadRecentItems()
+        loadItems()
         
         // Monitor window deactivation
         NotificationCenter.default.addObserver(
@@ -85,8 +87,17 @@ class PopupViewController: NSViewController {
     }
     
     private func setupUI() {
+        // Favorites filter button
+        favoritesButton = NSButton(frame: NSRect(x: 20, y: view.bounds.height - 50, width: 100, height: 30))
+        favoritesButton.title = "⭐ Favorites"
+        favoritesButton.bezelStyle = .rounded
+        favoritesButton.target = self
+        favoritesButton.action = #selector(toggleFavoritesFilter)
+        favoritesButton.autoresizingMask = .minYMargin
+        view.addSubview(favoritesButton)
+        
         // Search field with custom subclass for key handling
-        searchField = ClipboardSearchField(frame: NSRect(x: 20, y: view.bounds.height - 50, width: view.bounds.width - 40, height: 30))
+        searchField = ClipboardSearchField(frame: NSRect(x: 130, y: view.bounds.height - 50, width: view.bounds.width - 150, height: 30))
         searchField.placeholderString = "Search clipboard history..."
         searchField.autoresizingMask = [.width, .minYMargin]
         searchField.target = self
@@ -120,15 +131,43 @@ class PopupViewController: NSViewController {
         view.addSubview(scrollView)
     }
     
+    @objc private func toggleFavoritesFilter() {
+        showingFavoritesOnly = !showingFavoritesOnly
+        
+        // Update button appearance
+        if showingFavoritesOnly {
+            favoritesButton.title = "★ Favorites"
+            favoritesButton.bezelColor = .systemBlue
+            searchField.placeholderString = "Search favorites..."
+        } else {
+            favoritesButton.title = "⭐ Favorites"
+            favoritesButton.bezelColor = nil
+            searchField.placeholderString = "Search clipboard history..."
+        }
+        
+        // Clear search and reload
+        searchField.stringValue = ""
+        isSearching = false
+        loadItems()
+    }
+    
     @objc private func searchFieldChanged() {
         let query = searchField.stringValue
         
         if query.isEmpty {
             isSearching = false
-            loadRecentItems()
+            loadItems()
         } else {
             isSearching = true
-            items = ClipboardStorage.shared.searchItems(query: query, limit: 10)
+            if showingFavoritesOnly {
+                // Search within favorites only
+                let allFavorites = ClipboardStorage.shared.getFavorites()
+                items = allFavorites.filter { item in
+                    item.textContent?.localizedCaseInsensitiveContains(query) ?? false
+                }
+            } else {
+                items = ClipboardStorage.shared.searchItems(query: query, limit: 10)
+            }
             tableView.reloadData()
         }
         
@@ -136,6 +175,15 @@ class PopupViewController: NSViewController {
         if items.count > 0 {
             tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         }
+    }
+    
+    private func loadItems() {
+        if showingFavoritesOnly {
+            items = ClipboardStorage.shared.getFavorites()
+        } else {
+            items = ClipboardStorage.shared.getRecentItems(limit: 10)
+        }
+        tableView.reloadData()
     }
     
     @objc private func tableViewDoubleClick() {
@@ -175,16 +223,11 @@ class PopupViewController: NSViewController {
     }
     
     func reloadData() {
-        loadRecentItems()
+        loadItems()
         // Select first row after reload
         if items.count > 0 {
             tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         }
-    }
-    
-    private func loadRecentItems() {
-        items = ClipboardStorage.shared.getRecentItems(limit: 10)
-        tableView.reloadData()
     }
     
     @objc private func toggleFavorite(_ sender: NSButton) {
@@ -199,7 +242,7 @@ class PopupViewController: NSViewController {
         if isSearching {
             searchFieldChanged()
         } else {
-            loadRecentItems()
+            loadItems()
         }
     }
     
