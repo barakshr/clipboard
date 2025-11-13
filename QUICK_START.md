@@ -90,3 +90,5 @@ The app is now running and monitoring your clipboard. It will:
 
 Enjoy your new clipboard manager! 📋✨
 
+
+
