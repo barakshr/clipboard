@@ -36,3 +36,7 @@ Carthage/Build/
 *.sqlite3-shm
 *.sqlite3-wal
 
+# Built application
+ClipboardManager.app
+ClipboardManager.zip
+run_debug.sh

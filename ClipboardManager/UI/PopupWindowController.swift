@@ -166,7 +166,7 @@ class PopupViewController: NSViewController {
                     item.textContent?.localizedCaseInsensitiveContains(query) ?? false
                 }
             } else {
-                items = ClipboardStorage.shared.searchItems(query: query, limit: 10)
+                items = ClipboardStorage.shared.searchItems(query: query, limit: 100)
             }
             tableView.reloadData()
         }
@@ -181,7 +181,7 @@ class PopupViewController: NSViewController {
         if showingFavoritesOnly {
             items = ClipboardStorage.shared.getFavorites()
         } else {
-            items = ClipboardStorage.shared.getRecentItems(limit: 10)
+            items = ClipboardStorage.shared.getRecentItems(limit: 100)
         }
         tableView.reloadData()
     }
